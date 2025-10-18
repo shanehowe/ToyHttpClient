@@ -61,7 +61,7 @@ class HttpLineWriterTest {
   }
 
   @Test
-  void testNormalizeRemovesLeadingAndTrailingWhitespace() throws Exception {
+  void testNormalizeRemovesLeadingAndTrailingWhitespace() {
     // Access indirectly via writeln
     writer.writeln("  Test  ");
     String result = outputStream.toString(StandardCharsets.UTF_8);
