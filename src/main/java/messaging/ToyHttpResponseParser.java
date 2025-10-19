@@ -4,34 +4,46 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import org.jetbrains.annotations.NotNull;
 
 public class ToyHttpResponseParser {
 
-  public static ToyHttpResponse parse(InputStream socketInputStream) throws IOException {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(socketInputStream));
+  private final BufferedReader reader;
 
+  public ToyHttpResponseParser(InputStream inputStream) {
+    this.reader = new BufferedReader(new InputStreamReader(inputStream));
+  }
+
+  public static ToyHttpResponse parse(InputStream socketInputStream) throws IOException {
+    return new ToyHttpResponseParser(socketInputStream).parse();
+  }
+
+  public ToyHttpResponse parse() throws IOException {
     String[] statusLineArray = reader.readLine().split(" ");
     int statusCode = Integer.parseInt(statusLineArray[1]);
     String statusText = statusLineArray[2];
 
-    ToyHttpHeaders headers = new ToyHttpHeaders();
+    ToyHttpHeaders headers = parseHeaders();
+    String body = parseBody();
+    return new ToyHttpResponse(statusCode, statusText, headers, body);
+  }
+
+  private @NotNull String parseBody() throws IOException {
     StringBuilder bodyBuilder = new StringBuilder();
-    boolean encounteredNewLine = false;
     String nextLine;
-
     while ((nextLine = reader.readLine()) != null) {
-      if (nextLine.isBlank()) {
-        encounteredNewLine = true;
-        continue;
-      }
-
-      if (encounteredNewLine) {
-        bodyBuilder.append(nextLine);
-      } else {
-        String[] splitHeader = nextLine.split(": ");
-        headers.add(splitHeader[0], splitHeader[1]);
-      }
+      bodyBuilder.append(nextLine);
     }
-    return new ToyHttpResponse(statusCode, statusText, headers, bodyBuilder.toString());
+    return bodyBuilder.toString();
+  }
+
+  private ToyHttpHeaders parseHeaders() throws IOException {
+    ToyHttpHeaders headers = new ToyHttpHeaders();
+    String nextLine;
+    while (!(nextLine = reader.readLine()).isBlank()) {
+      String[] splitHeader = nextLine.split(": ");
+      headers.add(splitHeader[0], splitHeader[1]);
+    }
+    return headers;
   }
 }
