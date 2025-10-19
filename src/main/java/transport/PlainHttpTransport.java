@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Objects;
-import messaging.ToyHttpMessageWriter;
+import writer.ToyHttpMessageWriter;
 import messaging.ToyHttpRequest;
 import messaging.ToyHttpResponse;
-import messaging.ToyHttpResponseParser;
+import parser.ToyHttpResponseParser;
 
 public class PlainHttpTransport implements ToyHttpTransport {
 

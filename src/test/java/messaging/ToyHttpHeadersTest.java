@@ -34,7 +34,7 @@ class ToyHttpHeadersTest {
 
   @Test
   void testContainsReturnsTrueForExistingKey() {
-    headers.add("User-Agent", "ToyHttpClient");
+    headers.add("User-Agent", "client.ToyHttpClient");
     assertTrue(headers.contains("user-agent"));
     assertTrue(headers.contains("USER-AGENT"));
   }

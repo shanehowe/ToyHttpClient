@@ -1,6 +1,7 @@
-package messaging;
+package writer;
 
 import java.io.OutputStream;
+import messaging.ToyHttpRequest;
 
 public final class ToyHttpMessageWriter {
 

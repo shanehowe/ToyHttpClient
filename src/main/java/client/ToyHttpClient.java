@@ -1,3 +1,5 @@
+package client;
+
 import java.io.IOException;
 import messaging.ToyHttpRequest;
 import messaging.ToyHttpResponse;

@@ -1,4 +1,4 @@
-package messaging;
+package writer;
 
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
