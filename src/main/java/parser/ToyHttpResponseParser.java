@@ -38,20 +38,21 @@ public class ToyHttpResponseParser {
     String statusText = statusLineArray[2];
 
     ToyHttpHeaders headers = parseHeaders();
-    String body = parseBody(headers);
-    return new ToyHttpResponse(statusCode, statusText, headers, body);
+    byte[] body = parseBody(headers);
+    String contentEncoding = headers.getOrDefault("content-encoding", "identity");
+    ContentDecoder contentDecoder = ContentDecoderFactory.contentDecoder(contentEncoding, body);
+    return new ToyHttpResponse(
+        statusCode, statusText, headers, contentDecoder.decode(StandardCharsets.UTF_8));
   }
 
-  private @NotNull String parseBody(ToyHttpHeaders headers) throws IOException {
+  private byte[] parseBody(ToyHttpHeaders headers) throws IOException {
     if ("chunked".equalsIgnoreCase(headers.get("transfer-encoding"))) {
       return parseChunkedBody();
     }
-    ByteArrayOutputStream buff = new ByteArrayOutputStream();
-    buff.write(inputStream.readAllBytes());
-    return buff.toString(StandardCharsets.UTF_8);
+    return inputStream.readAllBytes();
   }
 
-  private String parseChunkedBody() throws IOException {
+  private byte[] parseChunkedBody() throws IOException {
     ByteArrayOutputStream bodyBytes = new ByteArrayOutputStream();
     while (true) {
       String hexLine = readAsciiLine().trim();
@@ -64,12 +65,12 @@ public class ToyHttpResponseParser {
       bodyBytes.write(chunk);
       consumeCRLF();
     }
-    return bodyBytes.toString(StandardCharsets.UTF_8);
+    return bodyBytes.toByteArray();
   }
 
   private void consumeCRLF() throws IOException {
     byte[] crlf = inputStream.readNBytes(2);
-    if (!"\r\n".equals(new String(crlf))) {
+    if (!"\r\n".equals(new String(crlf, StandardCharsets.US_ASCII))) {
       throw new UnsupportedOperationException("consumeCRLF called on non CRLF bytes");
     }
   }

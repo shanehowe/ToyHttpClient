@@ -23,6 +23,10 @@ public class ToyHttpHeaders {
     return headers.get(normalizeKey(name));
   }
 
+  public String getOrDefault(String name, String defaultValue) {
+    return headers.getOrDefault(name,defaultValue);
+  }
+
   public boolean contains(String name) {
     return headers.containsKey(normalizeKey(name));
   }
