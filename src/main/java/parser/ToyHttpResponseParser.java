@@ -1,9 +1,9 @@
 package parser;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import messaging.ToyHttpHeaders;
 import messaging.ToyHttpResponse;
@@ -12,10 +12,10 @@ import org.jetbrains.annotations.NotNull;
 public class ToyHttpResponseParser {
 
   private static final int VALID_STATUS_LINE_ARRAY_LENGTH = 3;
-  private final BufferedReader reader;
+  private final InputStream inputStream;
 
   public ToyHttpResponseParser(InputStream inputStream) {
-    this.reader = new BufferedReader(new InputStreamReader(inputStream));
+    this.inputStream = inputStream;
   }
 
   public static ToyHttpResponse parse(InputStream socketInputStream) throws IOException {
@@ -31,33 +31,73 @@ public class ToyHttpResponseParser {
   }
 
   public ToyHttpResponse parse() throws IOException {
-    String[] statusLineArray = reader.readLine().split(" ", 3);
+    String[] statusLineArray = readStatusLine().split(" ", 3);
     validateStatusLineArrayLength(statusLineArray);
 
     int statusCode = Integer.parseInt(statusLineArray[1]);
     String statusText = statusLineArray[2];
 
     ToyHttpHeaders headers = parseHeaders();
-    String body = parseBody();
+    String body = parseBody(headers);
     return new ToyHttpResponse(statusCode, statusText, headers, body);
   }
 
-  private @NotNull String parseBody() throws IOException {
-    StringBuilder bodyBuilder = new StringBuilder();
-    String nextLine;
-    while ((nextLine = reader.readLine()) != null) {
-      bodyBuilder.append(nextLine);
+  private @NotNull String parseBody(ToyHttpHeaders headers) throws IOException {
+    if ("chunked".equalsIgnoreCase(headers.get("transfer-encoding"))) {
+      return parseChunkedBody();
     }
-    return bodyBuilder.toString();
+    ByteArrayOutputStream buff = new ByteArrayOutputStream();
+    buff.write(inputStream.readAllBytes());
+    return buff.toString(StandardCharsets.UTF_8);
+  }
+
+  private String parseChunkedBody() throws IOException {
+    ByteArrayOutputStream bodyBytes = new ByteArrayOutputStream();
+    while (true) {
+      String hexLine = readAsciiLine().trim();
+      int chunkSize = Integer.parseInt(hexLine, 16);
+      if (chunkSize == 0) {
+        consumeCRLF();
+        break;
+      }
+      byte[] chunk = inputStream.readNBytes(chunkSize);
+      bodyBytes.write(chunk);
+      consumeCRLF();
+    }
+    return bodyBytes.toString(StandardCharsets.UTF_8);
+  }
+
+  private void consumeCRLF() throws IOException {
+    byte[] crlf = inputStream.readNBytes(2);
+    if (!"\r\n".equals(new String(crlf))) {
+      throw new UnsupportedOperationException("consumeCRLF called on non CRLF bytes");
+    }
   }
 
   private ToyHttpHeaders parseHeaders() throws IOException {
     ToyHttpHeaders headers = new ToyHttpHeaders();
-    String nextLine;
-    while (!(nextLine = reader.readLine()).isBlank()) {
-      String[] splitHeader = nextLine.split(": ");
-      headers.add(splitHeader[0], splitHeader[1]);
+    String line;
+    while (!(line = readAsciiLine().trim()).isEmpty()) {
+      String[] splitHeaderLine = line.split(": ", 2);
+      headers.add(splitHeaderLine[0], splitHeaderLine[1]);
     }
     return headers;
+  }
+
+  private String readStatusLine() throws IOException {
+    return readAsciiLine();
+  }
+
+  private @NotNull String readAsciiLine() throws IOException {
+    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    int previous = -1, current;
+    while ((current = inputStream.read()) != -1) {
+      if (previous == '\r' && current == '\n') {
+        break;
+      }
+      buffer.write(current);
+      previous = current;
+    }
+    return buffer.toString(StandardCharsets.US_ASCII).trim();
   }
 }
