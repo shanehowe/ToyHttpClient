@@ -10,7 +10,7 @@ public class Main {
     ToyHttpRequest toyHttpRequest =
         ToyHttpRequest.newBuilder()
             .GET()
-            .uri(URI.create("http://echo.free.beeceptor.com"))
+            .uri(URI.create("https://echo.free.beeceptor.com"))
             .header("X-Requested-by", "someone")
             .queryParam("page", "1")
             .build();
@@ -19,7 +19,7 @@ public class Main {
     ToyHttpResponse response = client.send(toyHttpRequest);
 
     System.out.printf("%s %s%n", response.statusCode(), response.statusText());
-    response.headers().forEach((k, v) -> System.out.printf("%s: %s%n", k,v));
+    response.headers().forEach((k, v) -> System.out.printf("%s: %s%n", k, v));
     System.out.println(response.body());
   }
 }
