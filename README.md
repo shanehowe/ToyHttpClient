@@ -42,11 +42,14 @@ ToyHttpClient is designed around clean abstractions:
 ---
 ## Limitations
 
-- Only supports **GET** requests  
+- Only supports **GET** requests. Although you can send **HEAD** and **DELETE** requests using `method("HEAD"/"DELETE")` on the `ToyHttpRequest`.
 - Does not support **binary** or **streaming** response bodies  
 - No **keep-alive** connection reuse  
 - No **redirect handling**  
 - No **proxy** support  
+
+Initially all I wanted to do was learn the HTTP message format so even though there are plenty more limitations that could be mentioned here I think the project is in a fairly decent state to say I have accomplished that.
+
 
 ---
 ## Purpose
