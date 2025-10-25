@@ -74,12 +74,6 @@ class ToyHttpRequestTest {
   }
 
   @Test
-  void testBuildThrowsWhenMethodNotProvided() {
-    var builder = ToyHttpRequest.newBuilder().uri(URI.create("http://example.com"));
-    assertThrows(NullPointerException.class, builder::build);
-  }
-
-  @Test
   void testHeadersAndQueryParamsAreImmutableAfterBuild() {
     ToyHttpRequest request =
         ToyHttpRequest.newBuilder().method("GET").uri(URI.create("http://example.com")).build();

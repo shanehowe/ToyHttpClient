@@ -31,7 +31,7 @@ public class ToyHttpResponseParser {
   }
 
   public ToyHttpResponse parse() throws IOException {
-    String[] statusLineArray = readStatusLine().split(" ", 3);
+    String[] statusLineArray = readAsciiLine().split(" ", 3);
     validateStatusLineArrayLength(statusLineArray);
 
     int statusCode = Integer.parseInt(statusLineArray[1]);
@@ -83,10 +83,6 @@ public class ToyHttpResponseParser {
       headers.add(splitHeaderLine[0], splitHeaderLine[1]);
     }
     return headers;
-  }
-
-  private String readStatusLine() throws IOException {
-    return readAsciiLine();
   }
 
   private @NotNull String readAsciiLine() throws IOException {
