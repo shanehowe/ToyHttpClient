@@ -49,6 +49,19 @@ public class ToyHttpResponseParser {
     if ("chunked".equalsIgnoreCase(headers.get("transfer-encoding"))) {
       return parseChunkedBody();
     }
+    if (headers.contains("content-length")) {
+      String contentLengthSr = headers.get("content-length");
+      try {
+        int contentLength = Integer.parseInt(contentLengthSr);
+        byte[] bytesRead = inputStream.readNBytes(contentLength);
+        if (bytesRead.length != contentLength) {
+          throw new IOException("mismatch between bytes read and content-length header");
+        }
+        return bytesRead;
+      } catch (NumberFormatException e) {
+        throw new IOException(e);
+      }
+    }
     return inputStream.readAllBytes();
   }
 
