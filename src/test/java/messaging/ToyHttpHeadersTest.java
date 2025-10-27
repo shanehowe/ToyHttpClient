@@ -93,4 +93,17 @@ class ToyHttpHeadersTest {
   void testRemoveNonExistentKeyReturnsNull() {
     assertNull(headers.remove("non-existent"));
   }
+
+  @Test
+  void testGetOrDefaultReturnsDefaultKey() {
+    String orDefault = headers.getOrDefault("want", "default");
+    assertEquals("default", orDefault);
+  }
+
+  @Test
+  void testGetOrDefaultNormalizesKey() {
+    headers.add("KEY", "value");
+    String value = headers.getOrDefault("key", "should not happen");
+    assertEquals("value",value);
+  }
 }

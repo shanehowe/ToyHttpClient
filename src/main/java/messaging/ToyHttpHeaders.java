@@ -24,7 +24,7 @@ public class ToyHttpHeaders {
   }
 
   public String getOrDefault(String name, String defaultValue) {
-    return headers.getOrDefault(name,defaultValue);
+    return headers.getOrDefault(normalizeKey(name), defaultValue);
   }
 
   public boolean contains(String name) {
