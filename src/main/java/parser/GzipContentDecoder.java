@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.zip.GZIPInputStream;
 
-public class GzipContentDecoder extends ContentDecoder {
+public final class GzipContentDecoder extends ContentDecoder {
 
   public GzipContentDecoder(byte[] bytes) {
     super(bytes);

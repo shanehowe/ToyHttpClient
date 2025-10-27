@@ -2,7 +2,7 @@ package parser;
 
 import java.nio.charset.Charset;
 
-public class IdentityContentDecoder extends ContentDecoder {
+public final class IdentityContentDecoder extends ContentDecoder {
 
   public IdentityContentDecoder(byte[] bytes) {
     super(bytes);
